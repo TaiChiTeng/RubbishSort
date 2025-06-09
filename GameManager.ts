@@ -50,6 +50,9 @@ export class GameManager extends Component {
     public finalGameScoreLabel: Label = null; // 最终游戏分数标签
 
     @property({ type: [Node] })
+    public ModeNode: Node[] = []; // 存储2个模式节点
+
+    @property({ type: [Node] })
     public Bins: Node[] = [];  // 存储4个垃圾箱节点
 
     @property({ type: [Node] })
@@ -171,6 +174,14 @@ export class GameManager extends Component {
 
     // 初始化每局数据
     private initGameData() {
+        if (this._isHardMode) {
+            this.ModeNode[0].active = false; // 隐藏简单模式节点
+            this.ModeNode[1].active = true; // 显示困难模式节点
+        }else {
+            this.ModeNode[0].active = true; // 显示简单模式节点
+            this.ModeNode[1].active = false; // 隐藏困难模式节点
+        }
+
         // 初始化分数
         this._gameScore = 0;
         this.updateScoreLabel();
