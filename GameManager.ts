@@ -1,8 +1,9 @@
 import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 30; // 定义全局游戏时间，单位为秒，测试版用30秒，正式版60秒吧
+const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
 const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
+const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
 
 // 垃圾类型枚举
 enum RubbishType {
@@ -147,6 +148,9 @@ export class GameManager extends Component {
 
         // 移除所有垃圾
         this.removeAllRubbish();
+
+        // 定时生成垃圾
+        this.schedule(this.generateRubbish.bind(this), RUBBISH_GENERATE_INTERVAL);
     }
 
     // 初始化垃圾箱类型
@@ -197,6 +201,9 @@ export class GameManager extends Component {
         // 显示TimeOver、最终分数
         this.timeOver.active = true;
         this.finalGameScoreLabel.string = this._gameScore.toString();
+
+        // 停止生成垃圾
+        this.unschedule(this.generateRubbish.bind(this));
     }
     // 加3分
     public addScore() {
