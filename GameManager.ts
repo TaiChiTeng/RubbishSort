@@ -1,7 +1,7 @@
-import { _decorator, Component, Node, Label, Vec3, Prefab, instantiate, Sprite, director } from 'cc';
+import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 30; // 定义全局游戏时间，单位为秒，测试版用30秒，正式版60秒吧
+const GAME_TIME = 15; // 定义全局游戏时间，单位为秒，测试版用15秒，正式版60秒吧
 const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
 
 // 垃圾类型枚举
@@ -10,6 +10,14 @@ enum RubbishType {
     Kitchen,    // 厨余垃圾
     Other,      // 其他垃圾
     Harmful     // 有害垃圾
+}
+
+// 垃圾数据结构
+interface RubbishData {
+    type: RubbishType;
+    name: string;
+    icon: SpriteFrame;
+    color: Color;
 }
 
 @ccclass('GameManager')
@@ -45,6 +53,9 @@ export class GameManager extends Component {
     @property({ type: Prefab })
     public RubbishPrefab: Prefab = null; // 存储 Rubbish 预制体
 
+    @property({ type: [SpriteFrame] })
+    public RubbishIcons: SpriteFrame[] = []; // 存储垃圾图标
+
     // 一局游戏的时间，单位为秒
     private _countDownTime: number = GAME_TIME;
     private _isCounting: boolean = false;
@@ -58,6 +69,9 @@ export class GameManager extends Component {
 
     // 存储当前场景中所有的垃圾节点
     private _rubbishNodes: Node[] = [];
+
+    // 垃圾数据
+    private _rubbishData: RubbishData[] = [];
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -73,6 +87,9 @@ export class GameManager extends Component {
 
         // 初始化 _rubbishOriPosLength
         this._rubbishOriPosLength = this.RubbishOriPos.length;
+
+        // 初始化垃圾数据
+        this.initRubbishData();
 
     }
 
@@ -249,9 +266,34 @@ export class GameManager extends Component {
         }
     }
 
+    // 初始化垃圾数据
+    private initRubbishData() {
+        this._rubbishData = [
+            { type: RubbishType.Recyclable, name: "旧书", icon: this.RubbishIcons[0], color: new Color(77, 142, 247) }, // 颜色4D8EF7
+            { type: RubbishType.Recyclable, name: "塑料瓶", icon: this.RubbishIcons[1], color: new Color(77, 142, 247) }, // 颜色4D8EF7
+            { type: RubbishType.Recyclable, name: "玻璃杯", icon: this.RubbishIcons[2], color: new Color(77, 142, 247) }, // 颜色4D8EF7
+
+            { type: RubbishType.Kitchen, name: "果皮", icon: this.RubbishIcons[3], color: new Color(38, 192, 141) }, // 颜色26C08D
+            { type: RubbishType.Kitchen, name: "菜叶", icon: this.RubbishIcons[4], color: new Color(38, 192, 141) }, // 颜色26C08D
+            { type: RubbishType.Kitchen, name: "蛋壳", icon: this.RubbishIcons[5], color: new Color(38, 192, 141) }, // 颜色26C08D
+
+            { type: RubbishType.Other, name: "脏的纸", icon: this.RubbishIcons[6], color: new Color(165, 172, 183) }, // 颜色A5ACB7
+            { type: RubbishType.Other, name: "一次性杯", icon: this.RubbishIcons[7], color: new Color(165, 172, 183) }, // 颜色A5ACB7
+            { type: RubbishType.Other, name: "旧胶带", icon: this.RubbishIcons[8], color: new Color(165, 172, 183) }, // 颜色A5ACB7
+
+            { type: RubbishType.Harmful, name: "旧电池", icon: this.RubbishIcons[9], color: new Color(165, 172, 183) }, // 颜色A5ACB7
+            { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(165, 172, 183) }, // 颜色A5ACB7
+            { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(165, 172, 183) }  // 颜色A5ACB7
+        ];
+    }
+
     // 生成垃圾
     private generateRubbish() {
         if (this.RubbishPrefab) {
+            // 随机选择一个垃圾数据
+            const randomIndex = Math.floor(Math.random() * this._rubbishData.length);
+            const rubbishData = this._rubbishData[randomIndex];
+
             // 实例化垃圾预制体
             const newRubbish = instantiate(this.RubbishPrefab);
 
@@ -265,6 +307,18 @@ export class GameManager extends Component {
             } else {
                 newRubbish.setPosition(0, 0, 0); // 默认位置
             }
+
+            // 设置垃圾的名称
+            const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
+            nameLabel.string = rubbishData.name;
+
+            // 设置垃圾的图标
+            const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
+            iconSprite.spriteFrame = rubbishData.icon;
+
+            // 设置垃圾的颜色
+            const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
+            colorSprite.color = rubbishData.color;
 
             // 将垃圾节点添加到数组中
             this._rubbishNodes.push(newRubbish);
