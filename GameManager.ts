@@ -1,9 +1,16 @@
 import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 6; // 定义全局游戏时间，单位为秒
+const GAME_TIME = 15; // 定义全局游戏时间，单位为秒
 const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
 const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
+
+// 困难模式配置
+const HARD_MODE_CONFIG = {
+    INITIAL_DROP_SPEED: -250,    // 初始掉落速度（比简单模式更快）
+    INITIAL_GENERATE_INTERVAL: 2, // 初始生成间隔（比简单模式更短）
+    GAME_TIME: 10,                // 困难模式时间（比简单模式短）
+};
 
 // 垃圾类型枚举
 enum RubbishType {
@@ -74,6 +81,12 @@ export class GameManager extends Component {
     // 垃圾数据
     private _rubbishData: RubbishData[] = [];
 
+    // 游戏难度模式
+    private _isHardMode: boolean = false;
+
+    // 新增回调引用
+    private _generateRubbishCallback: () => void = null;
+
     start() {
         // 初始时隐藏GamePlay、TimeOver
         this.mainMenu.active = true;
@@ -92,6 +105,7 @@ export class GameManager extends Component {
         // 初始化垃圾数据
         this.initRubbishData();
 
+        this._generateRubbishCallback = this.generateRubbish.bind(this);
     }
 
     update(deltaTime: number) {
@@ -111,6 +125,17 @@ export class GameManager extends Component {
 
     // 点击开始游戏按钮的处理函数
     public onStartGameButtonClicked() {
+        this._isHardMode = false;
+        this.startGame();
+    }
+
+    // 点击开始困难模式按钮的处理函数
+    public onStartHardModeButtonClicked() {
+        this._isHardMode = true;
+        this.startGame();
+    }
+
+    private startGame() {
         // 隐藏MainMenu
         this.mainMenu.active = false;
 
@@ -140,6 +165,8 @@ export class GameManager extends Component {
 
         // 显示MainMenu
         this.mainMenu.active = true;
+        // 确保返回主菜单时停止生成垃圾
+        this.stopGenerateRubbish();
     }
 
     // 初始化每局数据
@@ -147,9 +174,10 @@ export class GameManager extends Component {
         // 初始化分数
         this._gameScore = 0;
         this.updateScoreLabel();
+
         // 初始化倒计时
-        this._countDownTime = GAME_TIME;
-        this.countDownLabel.string = this._countDownTime.toString();
+        this._countDownTime = this._isHardMode ? HARD_MODE_CONFIG.GAME_TIME : GAME_TIME;
+        this.countDownLabel.string = Math.ceil(this._countDownTime).toString();
         this._isCounting = true;
 
         // 重新初始化垃圾箱位置
@@ -159,7 +187,24 @@ export class GameManager extends Component {
         this.removeAllRubbish();
 
         // 定时生成垃圾
-        this.schedule(this.generateRubbish.bind(this), RUBBISH_GENERATE_INTERVAL);
+        this.stopGenerateRubbish();
+        this.startGenerateRubbish();
+    }
+
+    // 启动生成垃圾的定时器
+    private startGenerateRubbish() {
+        const interval = this._isHardMode 
+        ? HARD_MODE_CONFIG.INITIAL_GENERATE_INTERVAL 
+        : RUBBISH_GENERATE_INTERVAL;
+      
+      this.schedule(this._generateRubbishCallback, interval);
+    }
+
+    // 停止生成垃圾的定时器
+    private stopGenerateRubbish() {
+        if (this._generateRubbishCallback) {
+            this.unschedule(this._generateRubbishCallback);
+          }
     }
 
     // 初始化垃圾箱类型
@@ -212,7 +257,7 @@ export class GameManager extends Component {
         this.finalGameScoreLabel.string = this._gameScore.toString();
 
         // 停止生成垃圾
-        this.unschedule(this.generateRubbish.bind(this));
+        this.stopGenerateRubbish();
     }
     // 加3分
     public addScore() {
@@ -349,11 +394,13 @@ export class GameManager extends Component {
 
     // 更新所有垃圾的位置
     private updateRubbishPositions(deltaTime: number) {
+        let dropSpeed = this._isHardMode ? HARD_MODE_CONFIG.INITIAL_DROP_SPEED : RUBBISH_DROP_SPEED;
+
         for (let i = 0; i < this._rubbishNodes.length; i++) {
             const rubbishNode = this._rubbishNodes[i];
             if (rubbishNode) {
                 // 计算新的 Y 坐标
-                const newY = rubbishNode.position.y + RUBBISH_DROP_SPEED * deltaTime;
+                const newY = rubbishNode.position.y + dropSpeed * deltaTime;
 
                 // 更新垃圾的位置
                 rubbishNode.setPosition(rubbishNode.position.x, newY, 0);
