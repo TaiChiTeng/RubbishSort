@@ -281,9 +281,9 @@ export class GameManager extends Component {
             { type: RubbishType.Other, name: "一次性杯", icon: this.RubbishIcons[7], color: new Color(165, 172, 183) }, // 颜色A5ACB7，其他垃圾
             { type: RubbishType.Other, name: "旧胶带", icon: this.RubbishIcons[8], color: new Color(165, 172, 183) }, // 颜色A5ACB7，其他垃圾
 
-            { type: RubbishType.Harmful, name: "旧电池", icon: this.RubbishIcons[9], color: new Color(165, 172, 183) }, // 颜色A5ACB7，有害垃圾
-            { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(165, 172, 183) }, // 颜色A5ACB7，有害垃圾
-            { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(165, 172, 183) }  // 颜色A5ACB7，有害垃圾
+            { type: RubbishType.Harmful, name: "旧电池", icon: this.RubbishIcons[9], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
+            { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
+            { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(240, 86, 86) }  // 颜色F05656，有害垃圾
         ];
     }
 
