@@ -3,6 +3,14 @@ const { ccclass, property } = _decorator;
 
 const GAME_TIME = 5; // 定义全局游戏时间，单位为秒，测试版用5秒，正式版60秒吧
 
+// 垃圾类型枚举
+enum RubbishType {
+    Recyclable, // 可回收物
+    Kitchen,    // 厨余垃圾
+    Other,      // 其他垃圾
+    Harmful     // 有害垃圾
+}
+
 @ccclass('GameManager')
 export class GameManager extends Component {
 
@@ -35,11 +43,17 @@ export class GameManager extends Component {
     private _isCounting: boolean = false;
     private _gameScore: number = 0;
 
+    // 垃圾箱类型数组
+    private _binTypes: RubbishType[] = [];
+
     start() {
         // 初始时隐藏GamePlay、TimeOver
         this.mainMenu.active = true;
         this.gamePlay.active = false;
         this.timeOver.active = false;
+
+        // 初始化垃圾箱类型
+        this.initBinTypes();
 
         // 初始化垃圾箱位置
         this.initBinsPosition();
@@ -95,10 +109,43 @@ export class GameManager extends Component {
         this.initBinsPosition();
     }
 
+    // 初始化垃圾箱类型
+    private initBinTypes() {
+        this._binTypes = [
+            RubbishType.Recyclable,
+            RubbishType.Kitchen,
+            RubbishType.Other,
+            RubbishType.Harmful
+        ];
+    }
+
     // 初始化垃圾箱位置
     private initBinsPosition() {
+        // 按照垃圾类型排序
+        this.sortBinsByType();
+
         for (let i = 0; i < this.Bins.length; i++) {
             this.Bins[i].setPosition(this.BinPos[i].position.x, this.BinPos[i].position.y, 0);
+        }
+    }
+
+    // 按照垃圾类型给垃圾箱排序
+    private sortBinsByType() {
+        // 使用冒泡排序，根据垃圾类型进行排序
+        for (let i = 0; i < this.Bins.length - 1; i++) {
+            for (let j = 0; j < this.Bins.length - i - 1; j++) {
+                if (this._binTypes[j] > this._binTypes[j + 1]) {
+                    // 交换垃圾箱类型
+                    let tempType = this._binTypes[j];
+                    this._binTypes[j] = this._binTypes[j + 1];
+                    this._binTypes[j + 1] = tempType;
+
+                    // 交换垃圾箱节点
+                    let tempBin = this.Bins[j];
+                    this.Bins[j] = this.Bins[j + 1];
+                    this.Bins[j + 1] = tempBin;
+                }
+            }
         }
     }
 
@@ -143,6 +190,11 @@ export class GameManager extends Component {
 
     // 交换垃圾箱
     private swapBins(index1: number, index2: number) {
+        // 交换垃圾箱类型
+        let tempType = this._binTypes[index1];
+        this._binTypes[index1] = this._binTypes[index2];
+        this._binTypes[index2] = tempType;
+
         // 交换节点
         let temp = this.Bins[index1];
         this.Bins[index1] = this.Bins[index2];
