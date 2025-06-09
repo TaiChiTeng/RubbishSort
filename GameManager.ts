@@ -1,7 +1,7 @@
 import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
+const GAME_TIME = 6; // 定义全局游戏时间，单位为秒
 const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
 const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
 
@@ -131,6 +131,15 @@ export class GameManager extends Component {
 
         // 初始化新的一局数据
         this.initGameData();
+    }
+
+    // 点击回主菜单按钮的处理函数
+    public onMainMenuButtonClicked() {
+        // 隐藏TimeOver
+        this.timeOver.active = false;
+
+        // 显示MainMenu
+        this.mainMenu.active = true;
     }
 
     // 初始化每局数据
