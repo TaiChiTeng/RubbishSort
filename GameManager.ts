@@ -1,7 +1,8 @@
-import { _decorator, Component, Node, Label, Vec3 } from 'cc';
+import { _decorator, Component, Node, Label, Vec3, Prefab, instantiate, Sprite, director } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 5; // 定义全局游戏时间，单位为秒，测试版用5秒，正式版60秒吧
+const GAME_TIME = 30; // 定义全局游戏时间，单位为秒，测试版用30秒，正式版60秒吧
+const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
 
 // 垃圾类型枚举
 enum RubbishType {
@@ -38,6 +39,12 @@ export class GameManager extends Component {
     @property({ type: [Node] })
     public BinPos: Node[] = []; // 存储4个垃圾箱节点的初始坐标节点
 
+    @property({ type: [Node] })
+    public RubbishOriPos: Node[] = []; // 存储垃圾生成点的坐标节点
+
+    @property({ type: Prefab })
+    public RubbishPrefab: Prefab = null; // 存储 Rubbish 预制体
+
     // 一局游戏的时间，单位为秒
     private _countDownTime: number = GAME_TIME;
     private _isCounting: boolean = false;
@@ -45,6 +52,12 @@ export class GameManager extends Component {
 
     // 垃圾箱类型数组
     private _binTypes: RubbishType[] = [];
+
+    // 缓存 RubbishOriPos 数组的长度
+    private _rubbishOriPosLength: number = 4;
+
+    // 存储当前场景中所有的垃圾节点
+    private _rubbishNodes: Node[] = [];
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -57,6 +70,10 @@ export class GameManager extends Component {
 
         // 初始化垃圾箱位置
         this.initBinsPosition();
+
+        // 初始化 _rubbishOriPosLength
+        this._rubbishOriPosLength = this.RubbishOriPos.length;
+
     }
 
     update(deltaTime: number) {
@@ -69,6 +86,9 @@ export class GameManager extends Component {
             }
             this.countDownLabel.string = Math.ceil(this._countDownTime).toString();
         }
+
+        // 更新所有垃圾的位置
+        this.updateRubbishPositions(deltaTime);
     }
 
     // 点击开始游戏按钮的处理函数
@@ -107,6 +127,9 @@ export class GameManager extends Component {
 
         // 重新初始化垃圾箱位置
         this.initBinsPosition();
+
+        // 移除所有垃圾
+        this.removeAllRubbish();
     }
 
     // 初始化垃圾箱类型
@@ -203,5 +226,87 @@ export class GameManager extends Component {
         // 交换位置
         this.Bins[index1].setPosition(this.BinPos[index1].position.x, this.BinPos[index1].position.y, 0);
         this.Bins[index2].setPosition(this.BinPos[index2].position.x, this.BinPos[index2].position.y, 0);
+    }
+
+    /**
+     * 从 RubbishOriPos 数组中随机抽取一个节点
+     * 优化版本：缓存数组长度，使用更快的随机数生成方式
+     * @returns {Node | null} 随机抽取的节点，如果数组为空则返回 null
+     */
+    private getRandomRubbishOriginPosition(): Node | null {
+        if (this._rubbishOriPosLength === 0) {
+            return null; // 数组为空，返回 null
+        }
+        // 使用 Math.random() 生成 0 到 3 的随机整数
+        const randomIndex = Math.floor(Math.random() * this._rubbishOriPosLength);
+        return this.RubbishOriPos[randomIndex];
+    }
+
+    // 点击生成垃圾按钮
+    public onGenerateRubbishButtonClicked() {
+        if (this._isCounting) { // 确保在倒计时期间才能生成垃圾
+            this.generateRubbish();
+        }
+    }
+
+    // 生成垃圾
+    private generateRubbish() {
+        if (this.RubbishPrefab) {
+            // 实例化垃圾预制体
+            const newRubbish = instantiate(this.RubbishPrefab);
+
+            // 设置垃圾的父节点为 GamePlay 节点
+            newRubbish.setParent(this.gamePlay);
+
+            // 设置垃圾的初始位置
+            const randomPositionNode = this.getRandomRubbishOriginPosition();
+            if (randomPositionNode) {
+                newRubbish.setPosition(randomPositionNode.position.x, randomPositionNode.position.y, 0);
+            } else {
+                newRubbish.setPosition(0, 0, 0); // 默认位置
+            }
+
+            // 将垃圾节点添加到数组中
+            this._rubbishNodes.push(newRubbish);
+        } else {
+            console.warn("Rubbish Prefab 未设置！");
+        }
+    }
+
+    // 更新所有垃圾的位置
+    private updateRubbishPositions(deltaTime: number) {
+        for (let i = 0; i < this._rubbishNodes.length; i++) {
+            const rubbishNode = this._rubbishNodes[i];
+            if (rubbishNode) {
+                // 计算新的 Y 坐标
+                const newY = rubbishNode.position.y + RUBBISH_DROP_SPEED * deltaTime;
+
+                // 更新垃圾的位置
+                rubbishNode.setPosition(rubbishNode.position.x, newY, 0);
+
+                // 检查是否低于垃圾桶的位置
+                if (rubbishNode.position.y < this.BinPos[0].position.y) {
+                    // 移除垃圾
+                    rubbishNode.destroy();
+                    this._rubbishNodes.splice(i, 1);
+                    i--; // 调整索引，避免跳过下一个垃圾
+                }
+            } else {
+                // 如果垃圾节点为空，从数组中移除
+                this._rubbishNodes.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+    // 移除所有垃圾
+    private removeAllRubbish() {
+        for (let i = 0; i < this._rubbishNodes.length; i++) {
+            const rubbishNode = this._rubbishNodes[i];
+            if (rubbishNode) {
+                rubbishNode.destroy();
+            }
+        }
+        this._rubbishNodes = [];
     }
 }
