@@ -1,7 +1,7 @@
 import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3 } from 'cc';
 const { ccclass, property } = _decorator;
 
-const GAME_TIME = 15; // 定义全局游戏时间，单位为秒
+const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
 const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
 const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
 
@@ -9,7 +9,7 @@ const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为�
 const HARD_MODE_CONFIG = {
     INITIAL_DROP_SPEED: -250,    // 初始掉落速度（比简单模式更快）
     INITIAL_GENERATE_INTERVAL: 2, // 初始生成间隔（比简单模式更短）
-    GAME_TIME: 10,                // 困难模式时间（比简单模式短）
+    GAME_TIME: 90,                // 困难模式时间（比简单模式短）
 };
 
 // 垃圾类型枚举
@@ -84,17 +84,17 @@ export class GameManager extends Component {
     // 垃圾数据
     private _rubbishData: RubbishData[] = [];
 
-    // 新增四个垃圾类型数组
-    private _recyclableRubbish: RubbishData[] = [];
-    private _kitchenRubbish: RubbishData[] = [];
-    private _otherRubbish: RubbishData[] = [];
-    private _harmfulRubbish: RubbishData[] = [];
-
     // 游戏难度模式
     private _isHardMode: boolean = false;
 
     // 新增回调引用
     private _generateRubbishCallback: () => void = null;
+
+    // 连击计数器
+    private _comboCount: number = 0;
+
+    // 垃圾生成数量
+    private _rubbishGenerateCount: number = 1;
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -203,6 +203,10 @@ export class GameManager extends Component {
         // 移除所有垃圾
         this.removeAllRubbish();
 
+        // 初始化连击计数器和垃圾生成数量
+        this._comboCount = 0;
+        this._rubbishGenerateCount = 1;
+
         // 定时生成垃圾
         this.stopGenerateRubbish();
         this.startGenerateRubbish();
@@ -280,11 +284,13 @@ export class GameManager extends Component {
     public addScore() {
         this._gameScore += 3;
         this.updateScoreLabel();
+        this.increaseCombo(); // 增加连击计数
     }
     // 扣1分
     public deductScore() {
         this._gameScore -= 1;
         this.updateScoreLabel();
+        this.resetCombo(); // 重置连击计数
     }
     // 更新分数Label显示
     private updateScoreLabel() {
@@ -363,77 +369,91 @@ export class GameManager extends Component {
             { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
             { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(240, 86, 86) }  // 颜色F05656，有害垃圾
         ];
-
-        // 初始化四个垃圾类型数组
-        this._recyclableRubbish = this._rubbishData.filter(item => item.type === RubbishType.Recyclable);
-        this._kitchenRubbish = this._rubbishData.filter(item => item.type === RubbishType.Kitchen);
-        this._otherRubbish = this._rubbishData.filter(item => item.type === RubbishType.Other);
-        this._harmfulRubbish = this._rubbishData.filter(item => item.type === RubbishType.Harmful);
     }
 
-    // 生成垃圾
+    /**
+     * 生成垃圾
+     * 确保每次生成的垃圾都是不同种类的
+     */
     private generateRubbish() {
         if (this.RubbishPrefab) {
-            // 随机选择一个垃圾类型
-            const rubbishTypeIndex = Math.floor(Math.random() * 4);
-            let rubbishData: RubbishData | null = null;
+            // 获取垃圾数据的长度
+            const rubbishDataLength = this._rubbishData.length;
 
-            // 根据垃圾类型索引，从对应的数组中随机选择一个垃圾数据
-            switch (rubbishTypeIndex) {
-                case 0:
-                    rubbishData = this._recyclableRubbish[Math.floor(Math.random() * this._recyclableRubbish.length)];
-                    break;
-                case 1:
-                    rubbishData = this._kitchenRubbish[Math.floor(Math.random() * this._kitchenRubbish.length)];
-                    break;
-                case 2:
-                    rubbishData = this._otherRubbish[Math.floor(Math.random() * this._otherRubbish.length)];
-                    break;
-                case 3:
-                    rubbishData = this._harmfulRubbish[Math.floor(Math.random() * this._harmfulRubbish.length)];
-                    break;
+            // 如果垃圾生成数量大于垃圾数据的长度，则将垃圾生成数量设置为垃圾数据的长度
+            const generateCount = Math.min(this._rubbishGenerateCount, rubbishDataLength);
+
+            // 创建一个数组，用于存储已经选择的垃圾类型
+            const selectedTypes: RubbishType[] = [];
+
+            // 获取 RubbishType 的所有值
+            const rubbishTypeValues: RubbishType[] = Object.keys(RubbishType)
+                .filter(key => isNaN(Number(key))) // 过滤掉数字类型的 key
+                .map(key => RubbishType[key]);
+
+            // 循环生成垃圾
+            while (selectedTypes.length < generateCount) {
+                // 随机选择一个垃圾类型
+                const typeIndex = Math.floor(Math.random() * rubbishTypeValues.length);
+                const type = rubbishTypeValues[typeIndex];
+
+                // 确保每次生成的垃圾都是不同种类的
+                if (selectedTypes.indexOf(type) === -1) {
+                    selectedTypes.push(type);
+                }
             }
 
-            // 检查是否成功获取到垃圾数据
-            if (rubbishData) {
-                // 实例化垃圾预制体
-                const newRubbish = instantiate(this.RubbishPrefab);
-
-                // 设置垃圾的父节点为 GamePlay 节点
-                newRubbish.setParent(this.gamePlay);
-
-                // 设置垃圾的初始位置
-                const randomPositionNode = this.getRandomRubbishOriginPosition();
-                if (randomPositionNode) {
-                    newRubbish.setPosition(randomPositionNode.position.x, randomPositionNode.position.y, 0);
-                } else {
-                    newRubbish.setPosition(0, 0, 0); // 默认位置
+            // 根据选择的垃圾类型创建垃圾
+            for (let i = 0; i < selectedTypes.length; i++) {
+                const type = selectedTypes[i];
+                // 根据垃圾类型找到对应的垃圾数据
+                const rubbishData = this._rubbishData.find(data => data.type === type);
+                if (rubbishData) {
+                    this.createSingleRubbish(rubbishData);
                 }
-
-                // 设置垃圾的名称
-                const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
-                nameLabel.string = rubbishData.name;
-
-                // 设置垃圾的图标
-                const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
-                iconSprite.spriteFrame = rubbishData.icon;
-
-                // 设置垃圾的颜色
-                const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
-                colorSprite.color = rubbishData.color;
-
-                // 将垃圾类型存储到垃圾节点的用户数据中
-                // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
-                newRubbish["_customRubbishType"] = rubbishData.type;
-
-                // 将垃圾节点添加到数组中
-                this._rubbishNodes.push(newRubbish);
-            } else {
-                console.warn("未能获取到垃圾数据！");
             }
         } else {
             console.warn("Rubbish Prefab 未设置！");
         }
+    }
+
+    /**
+     * 创建单个垃圾
+     * @param rubbishData 垃圾数据
+     */
+    private createSingleRubbish(rubbishData: RubbishData) {
+        // 实例化垃圾预制体
+        const newRubbish = instantiate(this.RubbishPrefab);
+
+        // 设置垃圾的父节点为 GamePlay 节点
+        newRubbish.setParent(this.gamePlay);
+
+        // 设置垃圾的初始位置
+        const randomPositionNode = this.getRandomRubbishOriginPosition();
+        if (randomPositionNode) {
+            newRubbish.setPosition(randomPositionNode.position.x, randomPositionNode.position.y, 0);
+        } else {
+            newRubbish.setPosition(0, 0, 0); // 默认位置
+        }
+
+        // 设置垃圾的名称
+        const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
+        nameLabel.string = rubbishData.name;
+
+        // 设置垃圾的图标
+        const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
+        iconSprite.spriteFrame = rubbishData.icon;
+
+        // 设置垃圾的颜色
+        const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
+        colorSprite.color = rubbishData.color;
+
+        // 将垃圾类型存储到垃圾节点的用户数据中
+        // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
+        newRubbish["_customRubbishType"] = rubbishData.type;
+
+        // 将垃圾节点添加到数组中
+        this._rubbishNodes.push(newRubbish);
     }
 
     // 更新所有垃圾的位置
@@ -490,5 +510,32 @@ export class GameManager extends Component {
             }
         }
         this._rubbishNodes = [];
+    }
+
+    // 增加连击计数
+    private increaseCombo() {
+        if (this._isHardMode) {
+            this._comboCount++;
+            // 连击2次后，每次生成2个垃圾
+            if (this._comboCount >= 2 && this._comboCount < 4) {
+                this._rubbishGenerateCount = 2;
+            }
+            // 连击4次后，每次生成3个垃圾
+            else if (this._comboCount >= 4 && this._comboCount < 10) {
+                this._rubbishGenerateCount = 3;
+            }
+            // 连击10次后，每次生成4个垃圾
+            else if (this._comboCount >= 10) {
+                this._rubbishGenerateCount = 4;
+            }
+        }
+    }
+
+    // 重置连击计数
+    private resetCombo() {
+        if (this._isHardMode) {
+            this._comboCount = 0;
+            this._rubbishGenerateCount = 1; // 重置为单垃圾生成模式
+        }
     }
 }
