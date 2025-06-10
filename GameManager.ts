@@ -84,6 +84,12 @@ export class GameManager extends Component {
     // 垃圾数据
     private _rubbishData: RubbishData[] = [];
 
+    // 新增四个垃圾类型数组
+    private _recyclableRubbish: RubbishData[] = [];
+    private _kitchenRubbish: RubbishData[] = [];
+    private _otherRubbish: RubbishData[] = [];
+    private _harmfulRubbish: RubbishData[] = [];
+
     // 游戏难度模式
     private _isHardMode: boolean = false;
 
@@ -357,47 +363,74 @@ export class GameManager extends Component {
             { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
             { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(240, 86, 86) }  // 颜色F05656，有害垃圾
         ];
+
+        // 初始化四个垃圾类型数组
+        this._recyclableRubbish = this._rubbishData.filter(item => item.type === RubbishType.Recyclable);
+        this._kitchenRubbish = this._rubbishData.filter(item => item.type === RubbishType.Kitchen);
+        this._otherRubbish = this._rubbishData.filter(item => item.type === RubbishType.Other);
+        this._harmfulRubbish = this._rubbishData.filter(item => item.type === RubbishType.Harmful);
     }
 
     // 生成垃圾
     private generateRubbish() {
         if (this.RubbishPrefab) {
-            // 随机选择一个垃圾数据
-            const randomIndex = Math.floor(Math.random() * this._rubbishData.length);
-            const rubbishData = this._rubbishData[randomIndex];
+            // 随机选择一个垃圾类型
+            const rubbishTypeIndex = Math.floor(Math.random() * 4);
+            let rubbishData: RubbishData | null = null;
 
-            // 实例化垃圾预制体
-            const newRubbish = instantiate(this.RubbishPrefab);
-
-            // 设置垃圾的父节点为 GamePlay 节点
-            newRubbish.setParent(this.gamePlay);
-
-            // 设置垃圾的初始位置
-            const randomPositionNode = this.getRandomRubbishOriginPosition();
-            if (randomPositionNode) {
-                newRubbish.setPosition(randomPositionNode.position.x, randomPositionNode.position.y, 0);
-            } else {
-                newRubbish.setPosition(0, 0, 0); // 默认位置
+            // 根据垃圾类型索引，从对应的数组中随机选择一个垃圾数据
+            switch (rubbishTypeIndex) {
+                case 0:
+                    rubbishData = this._recyclableRubbish[Math.floor(Math.random() * this._recyclableRubbish.length)];
+                    break;
+                case 1:
+                    rubbishData = this._kitchenRubbish[Math.floor(Math.random() * this._kitchenRubbish.length)];
+                    break;
+                case 2:
+                    rubbishData = this._otherRubbish[Math.floor(Math.random() * this._otherRubbish.length)];
+                    break;
+                case 3:
+                    rubbishData = this._harmfulRubbish[Math.floor(Math.random() * this._harmfulRubbish.length)];
+                    break;
             }
 
-            // 设置垃圾的名称
-            const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
-            nameLabel.string = rubbishData.name;
+            // 检查是否成功获取到垃圾数据
+            if (rubbishData) {
+                // 实例化垃圾预制体
+                const newRubbish = instantiate(this.RubbishPrefab);
 
-            // 设置垃圾的图标
-            const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
-            iconSprite.spriteFrame = rubbishData.icon;
+                // 设置垃圾的父节点为 GamePlay 节点
+                newRubbish.setParent(this.gamePlay);
 
-            // 设置垃圾的颜色
-            const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
-            colorSprite.color = rubbishData.color;
+                // 设置垃圾的初始位置
+                const randomPositionNode = this.getRandomRubbishOriginPosition();
+                if (randomPositionNode) {
+                    newRubbish.setPosition(randomPositionNode.position.x, randomPositionNode.position.y, 0);
+                } else {
+                    newRubbish.setPosition(0, 0, 0); // 默认位置
+                }
 
-            // 将垃圾类型存储到垃圾节点的用户数据中
-            // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
-            newRubbish["_customRubbishType"] = rubbishData.type;
+                // 设置垃圾的名称
+                const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
+                nameLabel.string = rubbishData.name;
 
-            // 将垃圾节点添加到数组中
-            this._rubbishNodes.push(newRubbish);
+                // 设置垃圾的图标
+                const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
+                iconSprite.spriteFrame = rubbishData.icon;
+
+                // 设置垃圾的颜色
+                const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
+                colorSprite.color = rubbishData.color;
+
+                // 将垃圾类型存储到垃圾节点的用户数据中
+                // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
+                newRubbish["_customRubbishType"] = rubbishData.type;
+
+                // 将垃圾节点添加到数组中
+                this._rubbishNodes.push(newRubbish);
+            } else {
+                console.warn("未能获取到垃圾数据！");
+            }
         } else {
             console.warn("Rubbish Prefab 未设置！");
         }
