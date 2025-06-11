@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3 } from 'cc';
+import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3, Tween, tween, easing } from 'cc';
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
@@ -7,7 +7,7 @@ const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为�
 
 // 困难模式配置
 const HARD_MODE_CONFIG = {
-    INITIAL_DROP_SPEED: -150,    // 初始掉落速度
+    INITIAL_DROP_SPEED: -200,    // 初始掉落速度
     INITIAL_GENERATE_INTERVAL: 3, // 初始生成间隔
     GAME_TIME: 90,                // 困难模式时间
 };
@@ -452,8 +452,22 @@ export class GameManager extends Component {
         // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
         newRubbish["_customRubbishType"] = rubbishData.type;
 
+        // 初始状态设置为停留
+        newRubbish["_isWaiting"] = true;
+
         // 将垃圾节点添加到数组中
         this._rubbishNodes.push(newRubbish);
+
+        // 缩放动画
+        newRubbish.setScale(new Vec3(0.5, 0.5, 0.5)); // 初始缩放为0.5
+
+        tween(newRubbish)
+            .to(0.5, { scale: new Vec3(1.1, 1.1, 1) }, { easing: easing.quadOut }) // 放大到1.1倍
+            .to(0.5, { scale: new Vec3(1, 1, 1) }, { easing: easing.quadIn }) // 缩小到正常大小
+            .call(() => {
+                newRubbish["_isWaiting"] = false; // 动画结束后，开始掉落
+            })
+            .start();
     }
 
     // 更新所有垃圾的位置
@@ -463,6 +477,11 @@ export class GameManager extends Component {
         for (let i = 0; i < this._rubbishNodes.length; i++) {
             const rubbishNode = this._rubbishNodes[i];
             if (rubbishNode) {
+                if (rubbishNode["_isWaiting"]) {
+                    // 如果垃圾正在等待，则不更新位置
+                    continue;
+                }
+
                 // 计算新的 Y 坐标
                 const newY = rubbishNode.position.y + dropSpeed * deltaTime;
 
