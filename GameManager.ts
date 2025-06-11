@@ -48,7 +48,7 @@ export class GameManager extends Component {
     public gameScoreLabel: Label = null; // 游戏分数标签
 
     @property({ type: Label })
-    public finalGameScoreLabel: Label = null; // 最终游戏分数标签
+    public finalGameScoreLabel: Node = null; // 最终游戏分数标签
 
     @property({ type: [Node] })
     public ModeNode: Node[] = []; // 存储2个模式节点
@@ -282,20 +282,24 @@ export class GameManager extends Component {
         this.stopGenerateRubbish();
     }
     // 加3分
-    public addScore() {
+    public addScore(binIndex: number) {
         this._gameScore += 3;
         this.updateScoreLabel();
         this.increaseCombo(); // 增加连击计数
+        this.playCorrectBinAnimation(this.Bins[binIndex]);  // 播放垃圾桶正确动画
     }
     // 扣1分
-    public deductScore() {
+    public deductScore(binIndex: number) {
         this._gameScore -= 1;
         this.updateScoreLabel();
         this.resetCombo(); // 重置连击计数
+        this.playWrongBinAnimation(this.Bins[binIndex]); // 播放垃圾桶错误动画
     }
     // 更新分数Label显示
     private updateScoreLabel() {
-        this.gameScoreLabel.string = this._gameScore.toString();
+        if (this.finalGameScoreLabel) {
+            this.gameScoreLabel.string = this._gameScore.toString();
+        }
     }
 
     // 点击左边按钮
@@ -510,9 +514,9 @@ export class GameManager extends Component {
 
                             // 检查垃圾的类型是否与对应垃圾桶的类型相同
                             if (rubbishType === this._binTypes[j]) {
-                                this.addScore(); // 加 3 分
+                                this.addScore(j); // 加 3 分,传入垃圾桶的index
                             } else {
-                                this.deductScore(); // 扣 1 分
+                                this.deductScore(j); // 扣 1 分，传入垃圾桶的index
                             }
                             break; // 找到匹配的垃圾桶后，跳出循环
                         }
@@ -567,5 +571,34 @@ export class GameManager extends Component {
             this._comboCount = 0;
             this._rubbishGenerateCount = 1; // 重置为单垃圾生成模式
         }
+    }
+
+    /**
+     * 播放垃圾桶正确动画
+     * @param binNode 垃圾桶节点
+     */
+    private playCorrectBinAnimation(binNode: Node) {
+        const originalScale = new Vec3(1, 1, 1); // 原始大小
+        tween(binNode)
+            .to(0.1, { scale: new Vec3(0.95, 0.9, 1) }, { easing: easing.quadOut }) // 缩小
+            .to(0.1, { scale: new Vec3(1.05, 1.1, 1) }, { easing: easing.quadIn }) // 放大
+            .to(0.1, { scale: originalScale }, { easing: easing.quadOut }) // 恢复
+            .start();
+    }
+
+    /**
+     * 播放垃圾桶错误动画
+     * @param binNode 垃圾桶节点
+     */
+    private playWrongBinAnimation(binNode: Node) {
+        const originalPosition = binNode.position.clone();
+        const shakeOffset = 5; // 震动偏移量
+
+        tween(binNode)
+            .to(0.05, { position: new Vec3(originalPosition.x + shakeOffset, originalPosition.y, 0) })
+            .to(0.05, { position: new Vec3(originalPosition.x - shakeOffset, originalPosition.y, 0) })
+            .to(0.05, { position: new Vec3(originalPosition.x + shakeOffset, originalPosition.y, 0) })
+            .to(0.05, { position: originalPosition })
+            .start();
     }
 }
