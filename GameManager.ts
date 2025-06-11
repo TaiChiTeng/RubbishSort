@@ -7,9 +7,9 @@ const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为�
 
 // 困难模式配置
 const HARD_MODE_CONFIG = {
-    INITIAL_DROP_SPEED: -250,    // 初始掉落速度（比简单模式更快）
-    INITIAL_GENERATE_INTERVAL: 2, // 初始生成间隔（比简单模式更短）
-    GAME_TIME: 90,                // 困难模式时间（比简单模式短）
+    INITIAL_DROP_SPEED: -150,    // 初始掉落速度
+    INITIAL_GENERATE_INTERVAL: 3, // 初始生成间隔
+    GAME_TIME: 90,                // 困难模式时间
 };
 
 // 垃圾类型枚举
@@ -517,15 +517,15 @@ export class GameManager extends Component {
         if (this._isHardMode) {
             this._comboCount++;
             // 连击2次后，每次生成2个垃圾
-            if (this._comboCount >= 2 && this._comboCount < 4) {
+            if (this._comboCount >= 2 && this._comboCount < 3) {
                 this._rubbishGenerateCount = 2;
             }
-            // 连击4次后，每次生成3个垃圾
-            else if (this._comboCount >= 4 && this._comboCount < 10) {
+            // 连击3次后，每次生成3个垃圾
+            else if (this._comboCount >= 3 && this._comboCount < 4) {
                 this._rubbishGenerateCount = 3;
             }
             // 连击10次后，每次生成4个垃圾
-            else if (this._comboCount >= 10) {
+            else if (this._comboCount >= 4) {
                 this._rubbishGenerateCount = 4;
             }
         }
