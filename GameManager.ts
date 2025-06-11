@@ -2,12 +2,13 @@ import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, Sprite
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
-const RUBBISH_DROP_SPEED = -200; // 定义垃圾掉落速度，单位：像素/秒
+const RUBBISH_DROP_ACCELERATION = -150; // 定义垃圾掉落加速度，单位：像素/秒^2
 const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
+const RUBBISH_SPAWN_ANIMTIME_SCALE_UP = 0.2; // 定义垃圾生成时缩放动画放大时间，单位为秒
+const RUBBISH_SPAWN_ANIMTIME_SCALE_DOWN = 0.1; // 定义垃圾生成时缩放动画缩小时间，单位为秒
 
 // 困难模式配置
 const HARD_MODE_CONFIG = {
-    INITIAL_DROP_SPEED: -200,    // 初始掉落速度
     INITIAL_GENERATE_INTERVAL: 3, // 初始生成间隔
     GAME_TIME: 90,                // 困难模式时间
 };
@@ -94,7 +95,7 @@ export class GameManager extends Component {
     private _comboCount: number = 0;
 
     // 垃圾生成数量
-    private _rubbishGenerateCount: number = 1;
+    private _rubbishGenerateCount = 1;
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -214,10 +215,10 @@ export class GameManager extends Component {
 
     // 启动生成垃圾的定时器
     private startGenerateRubbish() {
-        const interval = this._isHardMode 
-        ? HARD_MODE_CONFIG.INITIAL_GENERATE_INTERVAL 
+        const interval = this._isHardMode
+        ? HARD_MODE_CONFIG.INITIAL_GENERATE_INTERVAL
         : RUBBISH_GENERATE_INTERVAL;
-      
+
       this.schedule(this._generateRubbishCallback, interval);
     }
 
@@ -458,12 +459,15 @@ export class GameManager extends Component {
         // 将垃圾节点添加到数组中
         this._rubbishNodes.push(newRubbish);
 
+        // 初始化垃圾的垂直速度
+        newRubbish["_verticalSpeed"] = 0;
+
         // 缩放动画
         newRubbish.setScale(new Vec3(0.5, 0.5, 0.5)); // 初始缩放为0.5
 
         tween(newRubbish)
-            .to(0.5, { scale: new Vec3(1.1, 1.1, 1) }, { easing: easing.quadOut }) // 放大到1.1倍
-            .to(0.5, { scale: new Vec3(1, 1, 1) }, { easing: easing.quadIn }) // 缩小到正常大小
+            .to(RUBBISH_SPAWN_ANIMTIME_SCALE_UP, { scale: new Vec3(1.1, 1.1, 1) }, { easing: easing.quadOut }) // 放大到1.1倍
+            .to(RUBBISH_SPAWN_ANIMTIME_SCALE_DOWN, { scale: new Vec3(1, 1, 1) }, { easing: easing.quadIn }) // 缩小到正常大小
             .call(() => {
                 newRubbish["_isWaiting"] = false; // 动画结束后，开始掉落
             })
@@ -472,8 +476,6 @@ export class GameManager extends Component {
 
     // 更新所有垃圾的位置
     private updateRubbishPositions(deltaTime: number) {
-        let dropSpeed = this._isHardMode ? HARD_MODE_CONFIG.INITIAL_DROP_SPEED : RUBBISH_DROP_SPEED;
-
         for (let i = 0; i < this._rubbishNodes.length; i++) {
             const rubbishNode = this._rubbishNodes[i];
             if (rubbishNode) {
@@ -482,8 +484,17 @@ export class GameManager extends Component {
                     continue;
                 }
 
+                // 获取垃圾当前的垂直速度
+                let verticalSpeed = rubbishNode["_verticalSpeed"] || 0;
+
+                // 计算新的垂直速度（加速度为每秒 -100）
+                verticalSpeed += RUBBISH_DROP_ACCELERATION * deltaTime;
+
+                // 更新垃圾的垂直速度
+                rubbishNode["_verticalSpeed"] = verticalSpeed;
+
                 // 计算新的 Y 坐标
-                const newY = rubbishNode.position.y + dropSpeed * deltaTime;
+                const newY = rubbishNode.position.y + verticalSpeed * deltaTime;
 
                 // 更新垃圾的位置
                 rubbishNode.setPosition(rubbishNode.position.x, newY, 0);
