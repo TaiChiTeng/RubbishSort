@@ -48,7 +48,7 @@ export class GameManager extends Component {
     public gameScoreLabel: Label = null; // 游戏分数标签
 
     @property({ type: Label })
-    public finalGameScoreLabel: Node = null; // 最终游戏分数标签
+    public finalGameScoreLabel: Label = null; // 最终游戏分数标签
 
     @property({ type: [Node] })
     public ModeNode: Node[] = []; // 存储2个模式节点
@@ -64,6 +64,9 @@ export class GameManager extends Component {
 
     @property({ type: Prefab })
     public RubbishPrefab: Prefab = null; // 存储 Rubbish 预制体
+
+    @property({ type: Prefab })
+    public RubbishHardPrefab: Prefab = null; // 存储 RubbishHard 预制体
 
     @property({ type: [SpriteFrame] })
     public RubbishIcons: SpriteFrame[] = []; // 存储垃圾图标
@@ -381,12 +384,20 @@ export class GameManager extends Component {
      * 确保每次生成的垃圾都是不同种类的
      */
     private generateRubbish() {
-        if (this.RubbishPrefab) {
+        // 根据难度模式选择不同的预制体
+        const rubbishPrefab = this._isHardMode ? this.RubbishHardPrefab : this.RubbishPrefab;
+
+        if (rubbishPrefab) {
             // 获取垃圾数据的长度
             const rubbishDataLength = this._rubbishData.length;
 
             // 如果垃圾生成数量大于垃圾数据的长度，则将垃圾生成数量设置为垃圾数据的长度
-            const generateCount = Math.min(this._rubbishGenerateCount, rubbishDataLength);
+            let generateCount = Math.min(this._rubbishGenerateCount, rubbishDataLength);
+
+            // 简单模式限制最大垃圾生成数量为 3
+            if (!this._isHardMode) {
+                generateCount = Math.min(generateCount, 3);
+            }
 
             // 创建一个数组，用于存储已经选择的垃圾类型
             const selectedTypes: RubbishType[] = [];
@@ -414,7 +425,7 @@ export class GameManager extends Component {
                 // 根据垃圾类型找到对应的垃圾数据
                 const rubbishData = this._rubbishData.find(data => data.type === type);
                 if (rubbishData) {
-                    this.createSingleRubbish(rubbishData);
+                    this.createSingleRubbish(rubbishData, rubbishPrefab); // 传入预制体
                 }
             }
         } else {
@@ -425,10 +436,11 @@ export class GameManager extends Component {
     /**
      * 创建单个垃圾
      * @param rubbishData 垃圾数据
+     * @param rubbishPrefab 垃圾预制体
      */
-    private createSingleRubbish(rubbishData: RubbishData) {
+    private createSingleRubbish(rubbishData: RubbishData, rubbishPrefab: Prefab) {
         // 实例化垃圾预制体
-        const newRubbish = instantiate(this.RubbishPrefab);
+        const newRubbish = instantiate(rubbishPrefab);
 
         // 设置垃圾的父节点为 GamePlay 节点
         newRubbish.setParent(this.gamePlay);
@@ -548,17 +560,28 @@ export class GameManager extends Component {
 
     // 增加连击计数
     private increaseCombo() {
-        if (this._isHardMode) {
+        if (!this._isHardMode) {
             this._comboCount++;
-            // 连击2次后，每次生成2个垃圾
+
+             // 简单模式：连击2次后，每次生成2个垃圾
             if (this._comboCount >= 2 && this._comboCount < 3) {
                 this._rubbishGenerateCount = 2;
             }
-            // 连击3次后，每次生成3个垃圾
+            // 简单模式：连击3次后，每次生成3个垃圾
+            else if (this._comboCount >= 3) {
+                this._rubbishGenerateCount = 3;
+            }
+        } else {
+              this._comboCount++;
+             // 困难模式：连击2次后，每次生成2个垃圾
+            if (this._comboCount >= 2 && this._comboCount < 3) {
+                this._rubbishGenerateCount = 2;
+            }
+            // 困难模式：连击3次后，每次生成3个垃圾
             else if (this._comboCount >= 3 && this._comboCount < 4) {
                 this._rubbishGenerateCount = 3;
             }
-            // 连击10次后，每次生成4个垃圾
+             // 困难模式：连击4次后，每次生成4个垃圾
             else if (this._comboCount >= 4) {
                 this._rubbishGenerateCount = 4;
             }
@@ -567,10 +590,8 @@ export class GameManager extends Component {
 
     // 重置连击计数
     private resetCombo() {
-        if (this._isHardMode) {
-            this._comboCount = 0;
-            this._rubbishGenerateCount = 1; // 重置为单垃圾生成模式
-        }
+        this._comboCount = 0;
+        this._rubbishGenerateCount = 1; // 重置为单垃圾生成模式
     }
 
     /**
