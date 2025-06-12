@@ -288,7 +288,7 @@ export class GameManager extends Component {
     public addScore(binIndex: number) {
         this._gameScore += 3;
         this.updateScoreLabel();
-        this.increaseCombo(); // 增加连击计数
+        if (this._isHardMode)this.increaseCombo(); // 增加连击计数
         this.playCorrectBinAnimation(this.Bins[binIndex]);  // 播放垃圾桶正确动画
     }
     // 扣1分
@@ -560,19 +560,7 @@ export class GameManager extends Component {
 
     // 增加连击计数
     private increaseCombo() {
-        if (!this._isHardMode) {
             this._comboCount++;
-
-             // 简单模式：连击2次后，每次生成2个垃圾
-            if (this._comboCount >= 2 && this._comboCount < 3) {
-                this._rubbishGenerateCount = 2;
-            }
-            // 简单模式：连击3次后，每次生成3个垃圾
-            else if (this._comboCount >= 3) {
-                this._rubbishGenerateCount = 3;
-            }
-        } else {
-              this._comboCount++;
              // 困难模式：连击2次后，每次生成2个垃圾
             if (this._comboCount >= 2 && this._comboCount < 3) {
                 this._rubbishGenerateCount = 2;
@@ -585,7 +573,6 @@ export class GameManager extends Component {
             else if (this._comboCount >= 4) {
                 this._rubbishGenerateCount = 4;
             }
-        }
     }
 
     // 重置连击计数
