@@ -2,15 +2,16 @@ import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, Sprite
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
-const RUBBISH_DROP_ACCELERATION = -500; // 定义垃圾掉落加速度，单位：像素/秒^2
-const RUBBISH_GENERATE_INTERVAL = 3; // 定义垃圾生成间隔，单位为秒
+const RUBBISH_DROP_ACCELERATION = -475; // 定义垃圾掉落加速度，单位：像素/秒^2
+const RUBBISH_GENERATE_INTERVAL = 2.85; // 定义垃圾生成间隔，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_UP = 0.2; // 定义垃圾生成时缩放动画放大时间，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_DOWN = 0.1; // 定义垃圾生成时缩放动画缩小时间，单位为秒
 const STAR_DESTROY_DELAY = 0.8; // 定义星星销毁延迟时间，单位为秒
+const START_ANIM_DESTROY_DELAY = 2.5; // 定义游戏开始动画销毁延迟时间，单位为秒
 
 // 困难模式配置
 const HARD_MODE_CONFIG = {
-    INITIAL_GENERATE_INTERVAL: 3, // 初始生成间隔
+    INITIAL_GENERATE_INTERVAL: 2.85, // 初始生成间隔
     GAME_TIME: 60,                // 困难模式时间
 };
 
@@ -77,6 +78,9 @@ export class GameManager extends Component {
 
     @property({ type: Prefab })
     public DeductStarPrefab: Prefab = null; // 存储 表现减分星星 预制体
+
+    @property({ type: Prefab })
+    public StartAnimPrefab: Prefab = null; // 存储 游戏准备开始动画 预制体
 
     // 一局游戏的时间，单位为秒
     private _countDownTime: number = GAME_TIME;
@@ -167,6 +171,9 @@ export class GameManager extends Component {
 
         // 初始化新的一局数据
         this.initGameData();
+
+        // 生成游戏开始动画
+        this.spawnStartAnim();
     }
 
     // 点击再来一局按钮的处理函数
@@ -179,6 +186,9 @@ export class GameManager extends Component {
 
         // 初始化新的一局数据
         this.initGameData();
+
+        // 生成游戏开始动画
+        this.spawnStartAnim();
     }
 
     // 点击回主菜单按钮的处理函数
@@ -228,6 +238,7 @@ export class GameManager extends Component {
 
     // 启动生成垃圾的定时器
     private startGenerateRubbish() {
+
         const interval = this._isHardMode
         ? HARD_MODE_CONFIG.INITIAL_GENERATE_INTERVAL
         : RUBBISH_GENERATE_INTERVAL;
@@ -663,5 +674,26 @@ export class GameManager extends Component {
         this.scheduleOnce(() => {
             starNode.destroy();
         }, STAR_DESTROY_DELAY);
+    }
+
+    /**
+     * 生成游戏开始动画
+     */
+    private spawnStartAnim() {
+        if (!this.StartAnimPrefab) return;
+
+        // 实例化预制体
+        const startAnimNode = instantiate(this.StartAnimPrefab);
+
+        // 设置父节点为 GamePlay 节点
+        startAnimNode.setParent(this.gamePlay);
+
+        // 设置位置为 GamePlay 节点的中心
+        startAnimNode.setPosition(0, 0, 0);
+
+        // 在 2.5 秒后销毁动画节点
+        this.scheduleOnce(() => {
+            startAnimNode.destroy();
+        }, START_ANIM_DESTROY_DELAY);
     }
 }
