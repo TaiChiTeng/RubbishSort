@@ -2,15 +2,16 @@ import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, Sprite
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
-const RUBBISH_DROP_ACCELERATION = -150; // 定义垃圾掉落加速度，单位：像素/秒^2
-const RUBBISH_GENERATE_INTERVAL = 2.5; // 定义垃圾生成间隔，单位为秒
+const RUBBISH_DROP_ACCELERATION = -500; // 定义垃圾掉落加速度，单位：像素/秒^2
+const RUBBISH_GENERATE_INTERVAL = 3; // 定义垃圾生成间隔，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_UP = 0.2; // 定义垃圾生成时缩放动画放大时间，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_DOWN = 0.1; // 定义垃圾生成时缩放动画缩小时间，单位为秒
+const STAR_DESTROY_DELAY = 0.8; // 定义星星销毁延迟时间，单位为秒
 
 // 困难模式配置
 const HARD_MODE_CONFIG = {
     INITIAL_GENERATE_INTERVAL: 3, // 初始生成间隔
-    GAME_TIME: 90,                // 困难模式时间
+    GAME_TIME: 60,                // 困难模式时间
 };
 
 // 垃圾类型枚举
@@ -71,6 +72,12 @@ export class GameManager extends Component {
     @property({ type: [SpriteFrame] })
     public RubbishIcons: SpriteFrame[] = []; // 存储垃圾图标
 
+    @property({ type: Prefab })
+    public AddStarPrefab: Prefab = null; // 存储 表现加分星星 预制体
+
+    @property({ type: Prefab })
+    public DeductStarPrefab: Prefab = null; // 存储 表现减分星星 预制体
+
     // 一局游戏的时间，单位为秒
     private _countDownTime: number = GAME_TIME;
     private _isCounting: boolean = false; // 是否正在倒计时
@@ -99,6 +106,9 @@ export class GameManager extends Component {
 
     // 垃圾生成数量
     private _rubbishGenerateCount = 1;
+
+    // 垃圾箱动画 Tween 对象
+    private _binTweens: (Tween<Node> | null)[] = [null, null, null, null];
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -284,19 +294,21 @@ export class GameManager extends Component {
         // 停止生成垃圾
         this.stopGenerateRubbish();
     }
-    // 加3分
+    // 加5分
     public addScore(binIndex: number) {
-        this._gameScore += 3;
+        this._gameScore += 5;
         this.updateScoreLabel();
-        if (this._isHardMode)this.increaseCombo(); // 增加连击计数
+        // if (this._isHardMode)this.increaseCombo(); // 增加连击计数  屏蔽了困难模式的连击奖励
         this.playCorrectBinAnimation(this.Bins[binIndex]);  // 播放垃圾桶正确动画
+        this.spawnStar(this.Bins[binIndex], this.AddStarPrefab); // 生成加分星星
     }
-    // 扣1分
+    // 扣3分
     public deductScore(binIndex: number) {
-        this._gameScore -= 1;
+        this._gameScore -= 3;
         this.updateScoreLabel();
         this.resetCombo(); // 重置连击计数
         this.playWrongBinAnimation(this.Bins[binIndex]); // 播放垃圾桶错误动画
+        this.spawnStar(this.Bins[binIndex], this.DeductStarPrefab); // 生成扣分星星
     }
     // 更新分数Label显示
     private updateScoreLabel() {
@@ -322,6 +334,10 @@ export class GameManager extends Component {
 
     // 交换垃圾箱
     private swapBins(index1: number, index2: number) {
+        // 停止垃圾箱的动画
+        this.stopBinAnimation(index1);
+        this.stopBinAnimation(index2);
+
         // 交换垃圾箱类型
         let tempType = this._binTypes[index1];
         this._binTypes[index1] = this._binTypes[index2];
@@ -335,6 +351,14 @@ export class GameManager extends Component {
         // 交换位置
         this.Bins[index1].setPosition(this.BinPos[index1].position.x, this.BinPos[index1].position.y, 0);
         this.Bins[index2].setPosition(this.BinPos[index2].position.x, this.BinPos[index2].position.y, 0);
+    }
+
+    /** 停止垃圾箱动画 */
+    private stopBinAnimation(index: number) {
+        if (this._binTweens[index]) {
+            this._binTweens[index].stop();
+            this._binTweens[index] = null;
+        }
     }
 
     /**
@@ -560,19 +584,21 @@ export class GameManager extends Component {
 
     // 增加连击计数
     private increaseCombo() {
-            this._comboCount++;
-             // 困难模式：连击2次后，每次生成2个垃圾
-            if (this._comboCount >= 2 && this._comboCount < 3) {
-                this._rubbishGenerateCount = 2;
-            }
-            // 困难模式：连击3次后，每次生成3个垃圾
-            else if (this._comboCount >= 3 && this._comboCount < 4) {
-                this._rubbishGenerateCount = 3;
-            }
-             // 困难模式：连击4次后，每次生成4个垃圾
-            else if (this._comboCount >= 4) {
-                this._rubbishGenerateCount = 4;
-            }
+      //  if (this._isHardMode){
+      //       this._comboCount++;
+      //        // 困难模式：正确连击5次后，每次生成2个垃圾
+      //       if (this._comboCount >= 5 && this._comboCount < 10) {
+      //           this._rubbishGenerateCount = 2;
+      //       }
+      //       // 困难模式：正确连击10次后，每次生成3个垃圾
+      //       else if (this._comboCount >= 10 && this._comboCount < 20) {
+      //           this._rubbishGenerateCount = 3;
+      //       }
+      //        // 困难模式：正确连击20次后，每次生成4个垃圾
+      //       else if (this._comboCount >= 20) {
+      //           this._rubbishGenerateCount = 4;
+      //       }
+      // }
     }
 
     // 重置连击计数
@@ -586,8 +612,11 @@ export class GameManager extends Component {
      * @param binNode 垃圾桶节点
      */
     private playCorrectBinAnimation(binNode: Node) {
+        const binIndex = this.Bins.indexOf(binNode);
+        if (binIndex === -1) return;
+
         const originalScale = new Vec3(1, 1, 1); // 原始大小
-        tween(binNode)
+        this._binTweens[binIndex] = tween(binNode)
             .to(0.1, { scale: new Vec3(0.95, 0.9, 1) }, { easing: easing.quadOut }) // 缩小
             .to(0.1, { scale: new Vec3(1.05, 1.1, 1) }, { easing: easing.quadIn }) // 放大
             .to(0.1, { scale: originalScale }, { easing: easing.quadOut }) // 恢复
@@ -599,14 +628,40 @@ export class GameManager extends Component {
      * @param binNode 垃圾桶节点
      */
     private playWrongBinAnimation(binNode: Node) {
+        const binIndex = this.Bins.indexOf(binNode);
+        if (binIndex === -1) return;
+
         const originalPosition = binNode.position.clone();
         const shakeOffset = 5; // 震动偏移量
 
-        tween(binNode)
+        this._binTweens[binIndex] = tween(binNode)
             .to(0.05, { position: new Vec3(originalPosition.x + shakeOffset, originalPosition.y, 0) })
             .to(0.05, { position: new Vec3(originalPosition.x - shakeOffset, originalPosition.y, 0) })
             .to(0.05, { position: new Vec3(originalPosition.x + shakeOffset, originalPosition.y, 0) })
             .to(0.05, { position: originalPosition })
             .start();
+    }
+
+    /**
+     * 生成加分/减分星星
+     * @param binNode 垃圾桶节点
+     * @param prefab 预制体
+     */
+    private spawnStar(binNode: Node, prefab: Prefab) {
+        if (!prefab) return;
+
+        // 实例化预制体
+        const starNode = instantiate(prefab);
+
+        // 设置父节点为 GamePlay 节点
+        starNode.setParent(this.gamePlay);
+
+        // 设置位置为垃圾桶的位置
+        starNode.setPosition(binNode.position);
+
+        // 在0.8秒后销毁星星节点
+        this.scheduleOnce(() => {
+            starNode.destroy();
+        }, STAR_DESTROY_DELAY);
     }
 }
