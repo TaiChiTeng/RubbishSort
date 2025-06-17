@@ -19,8 +19,8 @@ const HARD_MODE_CONFIG = {
 enum RubbishType {
     Recyclable, // 可回收物
     Kitchen,    // 厨余垃圾
-    Other,      // 其他垃圾
-    Harmful     // 有害垃圾
+    Harmful,    // 有害垃圾
+    Other       // 其他垃圾
 }
 
 // 垃圾数据结构
@@ -113,6 +113,12 @@ export class GameManager extends Component {
 
     // 垃圾箱动画 Tween 对象
     private _binTweens: (Tween<Node> | null)[] = [null, null, null, null];
+
+    // 定义垃圾颜色
+    private readonly RECYCLABLE_COLOR: Color = new Color(38, 92, 138); // 可回收物蓝色265C8A
+    private readonly KITCHEN_COLOR: Color = new Color(17, 112, 56); // 厨余垃圾绿色117038
+    private readonly HARMFUL_COLOR: Color = new Color(204, 39, 33); // 有害垃圾红色CC2721
+    private readonly OTHER_COLOR: Color = new Color(60, 56, 53); // 其他垃圾灰色3C3835
 
     start() {
         // 初始时隐藏GamePlay、TimeOver
@@ -257,9 +263,9 @@ export class GameManager extends Component {
     private initBinTypes() {
         this._binTypes = [
             RubbishType.Recyclable, // 可回收物
-            RubbishType.Kitchen, // 厨余垃圾
-            RubbishType.Other, // 其他垃圾
-            RubbishType.Harmful // 有害垃圾
+            RubbishType.Kitchen,    // 厨余垃圾
+            RubbishType.Harmful,    // 有害垃圾
+            RubbishType.Other       // 其他垃圾
         ];
     }
 
@@ -396,21 +402,29 @@ export class GameManager extends Component {
     // 初始化垃圾数据
     private initRubbishData() {
         this._rubbishData = [
-            { type: RubbishType.Recyclable, name: "旧书", icon: this.RubbishIcons[0], color: new Color(77, 142, 247) }, // 颜色4D8EF7，可回收物
-            { type: RubbishType.Recyclable, name: "塑料瓶", icon: this.RubbishIcons[1], color: new Color(77, 142, 247) }, // 颜色4D8EF7，可回收物
-            { type: RubbishType.Recyclable, name: "玻璃杯", icon: this.RubbishIcons[2], color: new Color(77, 142, 247) }, // 颜色4D8EF7，可回收物
+            { type: RubbishType.Recyclable, name: "玻璃", icon: this.RubbishIcons[0], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "金属", icon: this.RubbishIcons[1], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "塑料", icon: this.RubbishIcons[2], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "纸类", icon: this.RubbishIcons[3], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "织物", icon: this.RubbishIcons[4], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "家具", icon: this.RubbishIcons[5], color: this.RECYCLABLE_COLOR }, // 可回收物
+            { type: RubbishType.Recyclable, name: "电器电子产品", icon: this.RubbishIcons[6], color: this.RECYCLABLE_COLOR }, // 可回收物
 
-            { type: RubbishType.Kitchen, name: "果皮", icon: this.RubbishIcons[3], color: new Color(38, 192, 141) }, // 颜色26C08D，厨余垃圾
-            { type: RubbishType.Kitchen, name: "菜叶", icon: this.RubbishIcons[4], color: new Color(38, 192, 141) }, // 颜色26C08D，厨余垃圾
-            { type: RubbishType.Kitchen, name: "蛋壳", icon: this.RubbishIcons[5], color: new Color(38, 192, 141) }, // 颜色26C08D，厨余垃圾
+            { type: RubbishType.Kitchen, name: "家庭厨余垃圾", icon: this.RubbishIcons[7], color: this.KITCHEN_COLOR }, // 厨余垃圾
+            { type: RubbishType.Kitchen, name: "家庭厨余垃圾", icon: this.RubbishIcons[7], color: this.KITCHEN_COLOR }, // 厨余垃圾
+            { type: RubbishType.Kitchen, name: "餐厨垃圾", icon: this.RubbishIcons[8], color: this.KITCHEN_COLOR }, // 厨余垃圾
+            { type: RubbishType.Kitchen, name: "其他厨余垃圾", icon: this.RubbishIcons[9], color: this.KITCHEN_COLOR }, // 厨余垃圾
+            { type: RubbishType.Kitchen, name: "其他厨余垃圾", icon: this.RubbishIcons[9], color: this.KITCHEN_COLOR }, // 厨余垃圾
 
-            { type: RubbishType.Other, name: "脏的纸", icon: this.RubbishIcons[6], color: new Color(165, 172, 183) }, // 颜色A5ACB7，其他垃圾
-            { type: RubbishType.Other, name: "一次性杯", icon: this.RubbishIcons[7], color: new Color(165, 172, 183) }, // 颜色A5ACB7，其他垃圾
-            { type: RubbishType.Other, name: "旧胶带", icon: this.RubbishIcons[8], color: new Color(165, 172, 183) }, // 颜色A5ACB7，其他垃圾
+            { type: RubbishType.Harmful, name: "电池", icon: this.RubbishIcons[10], color: this.HARMFUL_COLOR }, // 有害垃圾
+            { type: RubbishType.Harmful, name: "电池", icon: this.RubbishIcons[10], color: this.HARMFUL_COLOR }, // 有害垃圾
+            { type: RubbishType.Harmful, name: "灯管", icon: this.RubbishIcons[11], color: this.HARMFUL_COLOR }, // 有害垃圾
+            { type: RubbishType.Harmful, name: "家用化学品", icon: this.RubbishIcons[12], color: this.HARMFUL_COLOR },  // 有害垃圾
 
-            { type: RubbishType.Harmful, name: "旧电池", icon: this.RubbishIcons[9], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
-            { type: RubbishType.Harmful, name: "过期药品", icon: this.RubbishIcons[10], color: new Color(240, 86, 86) }, // 颜色F05656，有害垃圾
-            { type: RubbishType.Harmful, name: "旧灯泡", icon: this.RubbishIcons[11], color: new Color(240, 86, 86) }  // 颜色F05656，有害垃圾
+            { type: RubbishType.Other, name: "绿化垃圾", icon: this.RubbishIcons[13], color: this.OTHER_COLOR }, // 其他垃圾
+            { type: RubbishType.Other, name: "绿化垃圾", icon: this.RubbishIcons[13], color: this.OTHER_COLOR }, // 其他垃圾
+            { type: RubbishType.Other, name: "年花年桔", icon: this.RubbishIcons[14], color: this.OTHER_COLOR }, // 其他垃圾
+            { type: RubbishType.Other, name: "花卉绿植", icon: this.RubbishIcons[15], color: this.OTHER_COLOR }, // 其他垃圾
         ];
     }
 
