@@ -2,7 +2,7 @@ import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, Sprite
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
-const RUBBISH_DROP_ACCELERATION = -475; // 定义垃圾掉落加速度，单位：像素/秒^2
+const RUBBISH_DROP_ACCELERATION = -450; // 定义垃圾掉落加速度，单位：像素/秒^2
 const RUBBISH_GENERATE_INTERVAL = 2.85; // 定义垃圾生成间隔，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_UP = 0.2; // 定义垃圾生成时缩放动画放大时间，单位为秒
 const RUBBISH_SPAWN_ANIMTIME_SCALE_DOWN = 0.1; // 定义垃圾生成时缩放动画缩小时间，单位为秒
@@ -120,6 +120,9 @@ export class GameManager extends Component {
     private readonly HARMFUL_COLOR: Color = new Color(204, 39, 33); // 有害垃圾红色CC2721
     private readonly OTHER_COLOR: Color = new Color(60, 56, 53); // 其他垃圾灰色3C3835
 
+    // 新增：存储已经生成的垃圾的索引
+    private _generatedRubbishIndices: number[] = [];
+
     start() {
         // 初始时隐藏GamePlay、TimeOver
         this.mainMenu.active = true;
@@ -236,6 +239,9 @@ export class GameManager extends Component {
         // 初始化连击计数器和垃圾生成数量
         this._comboCount = 0;
         this._rubbishGenerateCount = 1;
+
+        // 新增：重置已生成垃圾的索引数组
+        this._generatedRubbishIndices = [];
 
         // 定时生成垃圾
         this.stopGenerateRubbish();
@@ -430,7 +436,7 @@ export class GameManager extends Component {
 
     /**
      * 生成垃圾
-     * 确保每次生成的垃圾都是不同种类的
+     * 确保每局游戏里边，_rubbishData的每个垃圾都要至少生成1次
      */
     private generateRubbish() {
         // 根据难度模式选择不同的预制体
@@ -440,42 +446,24 @@ export class GameManager extends Component {
             // 获取垃圾数据的长度
             const rubbishDataLength = this._rubbishData.length;
 
-            // 如果垃圾生成数量大于垃圾数据的长度，则将垃圾生成数量设置为垃圾数据的长度
-            let generateCount = Math.min(this._rubbishGenerateCount, rubbishDataLength);
-
-            // 简单模式限制最大垃圾生成数量为 3
-            if (!this._isHardMode) {
-                generateCount = Math.min(generateCount, 3);
+            // 如果所有垃圾都已经生成过一次，则重置已生成垃圾的索引数组
+            if (this._generatedRubbishIndices.length === rubbishDataLength) {
+                this._generatedRubbishIndices = [];
             }
 
-            // 创建一个数组，用于存储已经选择的垃圾类型
-            const selectedTypes: RubbishType[] = [];
+            // 找到一个尚未生成的垃圾的索引
+            let index: number;
+            do {
+                index = Math.floor(Math.random() * rubbishDataLength);
+            } while (this._generatedRubbishIndices.includes(index));
 
-            // 获取 RubbishType 的所有值
-            const rubbishTypeValues: RubbishType[] = Object.keys(RubbishType)
-                .filter(key => isNaN(Number(key))) // 过滤掉数字类型的 key
-                .map(key => RubbishType[key]);
+            // 将该垃圾的索引添加到已生成垃圾的索引数组中
+            this._generatedRubbishIndices.push(index);
 
-            // 循环生成垃圾
-            while (selectedTypes.length < generateCount) {
-                // 随机选择一个垃圾类型
-                const typeIndex = Math.floor(Math.random() * rubbishTypeValues.length);
-                const type = rubbishTypeValues[typeIndex];
-
-                // 确保每次生成的垃圾都是不同种类的
-                if (selectedTypes.indexOf(type) === -1) {
-                    selectedTypes.push(type);
-                }
-            }
-
-            // 根据选择的垃圾类型创建垃圾
-            for (let i = 0; i < selectedTypes.length; i++) {
-                const type = selectedTypes[i];
-                // 根据垃圾类型找到对应的垃圾数据
-                const rubbishData = this._rubbishData.find(data => data.type === type);
-                if (rubbishData) {
-                    this.createSingleRubbish(rubbishData, rubbishPrefab); // 传入预制体
-                }
+            // 创建垃圾
+            const rubbishData = this._rubbishData[index];
+            if (rubbishData) {
+                this.createSingleRubbish(rubbishData, rubbishPrefab); // 传入预制体
             }
         } else {
             console.warn("Rubbish Prefab 未设置！");
