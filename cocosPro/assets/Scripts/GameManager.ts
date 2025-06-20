@@ -123,6 +123,12 @@ export class GameManager extends Component {
     // 新增：存储已经生成的垃圾的索引
     private _generatedRubbishIndices: number[] = [];
 
+    // 新增：简单模式垃圾加速度数组
+    private _rubbishEasyModeAcceleration: number[] = [-175,-235,-295,-235,-205,-235,-265,-265,-235,-265,-325,-325,-295,-265,-295,-355,-385,-325,-265,-205];
+
+    // 新增：已生成的垃圾数量
+    private _generatedRubbishCount: number = 0;
+
     start() {
         // 初始时隐藏GamePlay、TimeOver
         this.mainMenu.active = true;
@@ -242,6 +248,9 @@ export class GameManager extends Component {
 
         // 新增：重置已生成垃圾的索引数组
         this._generatedRubbishIndices = [];
+
+        // 新增：重置已生成的垃圾数量
+        this._generatedRubbishCount = 0;
 
         // 定时生成垃圾
         this.stopGenerateRubbish();
@@ -513,7 +522,18 @@ export class GameManager extends Component {
         this._rubbishNodes.push(newRubbish);
 
         // 初始化垃圾的垂直速度
+        // 如果是简单模式，则使用 _rubbishEasyModeAcceleration 数组中的值
+        // 否则，使用默认的 RUBBISH_DROP_ACCELERATION
+        let verticalSpeed: number;
+        if (this._isHardMode) {
+            verticalSpeed = RUBBISH_DROP_ACCELERATION;
+        } else {
+            // 确保 _generatedRubbishCount 不超过数组长度
+            const accelerationIndex = this._generatedRubbishCount % this._rubbishEasyModeAcceleration.length;
+            verticalSpeed = this._rubbishEasyModeAcceleration[accelerationIndex];
+        }
         newRubbish["_verticalSpeed"] = 0;
+        newRubbish["_rubbishAcceleration"] = verticalSpeed;
 
         // 缩放动画
         newRubbish.setScale(new Vec3(0.5, 0.5, 0.5)); // 初始缩放为0.5
@@ -525,6 +545,9 @@ export class GameManager extends Component {
                 newRubbish["_isWaiting"] = false; // 动画结束后，开始掉落
             })
             .start();
+
+        // 垃圾生成数量+1
+        this._generatedRubbishCount++;
     }
 
     // 更新所有垃圾的位置
@@ -539,9 +562,10 @@ export class GameManager extends Component {
 
                 // 获取垃圾当前的垂直速度
                 let verticalSpeed = rubbishNode["_verticalSpeed"] || 0;
+                let rubbishAcceleration = rubbishNode["_rubbishAcceleration"] || RUBBISH_DROP_ACCELERATION;
 
                 // 计算新的垂直速度（加速度为每秒 -100）
-                verticalSpeed += RUBBISH_DROP_ACCELERATION * deltaTime;
+                verticalSpeed += rubbishAcceleration * deltaTime;
 
                 // 更新垃圾的垂直速度
                 rubbishNode["_verticalSpeed"] = verticalSpeed;
