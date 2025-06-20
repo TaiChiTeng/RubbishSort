@@ -124,7 +124,10 @@ export class GameManager extends Component {
     private _generatedRubbishIndices: number[] = [];
 
     // 新增：简单模式垃圾加速度数组
-    private _rubbishEasyModeAcceleration: number[] = [-175,-235,-295,-235,-205,-235,-265,-265,-235,-265,-325,-325,-295,-265,-295,-355,-385,-325,-265,-205];
+    private _rubbishEasyModeAcceleration: number[] = [-175,-235,-295,-235,-205,-235,-265,-265,-235,-265,-325,-325,-295,-265,-295,-355,-385,-325,-265,-250];
+
+    // 新增：困难模式垃圾加速度数组
+    private _rubbishHardModeAcceleration: number[] = [-200,-264,-328,-264,-232,-264,-296,-296,-264,-296,-360,-360,-328,-296,-328,-392,-424,-360,-296,-250];
 
     // 新增：已生成的垃圾数量
     private _generatedRubbishCount: number = 0;
@@ -502,6 +505,12 @@ export class GameManager extends Component {
         // 设置垃圾的名称
         const nameLabel = newRubbish.getChildByName("labelName").getComponent(Label);
         nameLabel.string = rubbishData.name;
+        // 根据模式设置outlineColor
+        if (this._isHardMode) {
+            nameLabel.outlineColor = new Color(255, 255, 255, 255); // 困难模式白色描边
+        } else {
+            nameLabel.outlineColor = rubbishData.color; // 简单模式使用垃圾自身颜色
+        }
 
         // 设置垃圾的图标
         const iconSprite = newRubbish.getChildByName("spriteIcon").getComponent(Sprite);
@@ -509,7 +518,12 @@ export class GameManager extends Component {
 
         // 设置垃圾的颜色
         const colorSprite = newRubbish.getChildByName("spriteColor").getComponent(Sprite);
-        colorSprite.color = rubbishData.color;
+        // 根据模式设置color
+        if (this._isHardMode) {
+            colorSprite.color = new Color(255, 255, 255, 255); // 困难模式白色描边
+        } else {
+            colorSprite.color = rubbishData.color; // 简单模式使用垃圾自身颜色
+        }
 
         // 将垃圾类型存储到垃圾节点的用户数据中
         // 由于 Node 上不存在 setUserData 方法，使用自定义属性存储垃圾类型
@@ -522,18 +536,16 @@ export class GameManager extends Component {
         this._rubbishNodes.push(newRubbish);
 
         // 初始化垃圾的垂直速度
-        // 如果是简单模式，则使用 _rubbishEasyModeAcceleration 数组中的值
-        // 否则，使用默认的 RUBBISH_DROP_ACCELERATION
-        let verticalSpeed: number;
+        let accelerationIndex = this._generatedRubbishCount % this._rubbishEasyModeAcceleration.length;
+        let rubbishAcceleration: number;
+
         if (this._isHardMode) {
-            verticalSpeed = RUBBISH_DROP_ACCELERATION;
+            rubbishAcceleration = this._rubbishHardModeAcceleration[accelerationIndex];
         } else {
-            // 确保 _generatedRubbishCount 不超过数组长度
-            const accelerationIndex = this._generatedRubbishCount % this._rubbishEasyModeAcceleration.length;
-            verticalSpeed = this._rubbishEasyModeAcceleration[accelerationIndex];
+            rubbishAcceleration = this._rubbishEasyModeAcceleration[accelerationIndex];
         }
         newRubbish["_verticalSpeed"] = 0;
-        newRubbish["_rubbishAcceleration"] = verticalSpeed;
+        newRubbish["_rubbishAcceleration"] = rubbishAcceleration;
 
         // 缩放动画
         newRubbish.setScale(new Vec3(0.5, 0.5, 0.5)); // 初始缩放为0.5

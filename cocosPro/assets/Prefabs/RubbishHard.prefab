@@ -71,7 +71,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "SpriteColorBg",
+    "_name": "spriteColor",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -133,8 +133,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 120,
-      "height": 120
+      "width": 86,
+      "height": 86
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -145,7 +145,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "f8k6jmn/1Dv6riNk1ckLyx"
+    "fileId": "9emXuQVRJKnJnhex7AtRXD"
   },
   {
     "__type__": "cc.Sprite",
@@ -164,13 +164,13 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "939761fd-7819-4e8a-afaa-182f7c31aede@6e9cc",
+      "__uuid__": "939761fd-7819-4e8a-afaa-182f7c31aede@fd990",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -193,7 +193,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "b2SqhXQEVKZLdSin9DTp5O"
+    "fileId": "6ergGrnVFPyphai2dM8YiA"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -203,14 +203,14 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "7cIMlqZwlKm7nEiQNODIQK",
+    "fileId": "batg1lwHRIJ4/FpkJwUDOE",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
     "__type__": "cc.Node",
-    "_name": "spriteColor",
+    "_name": "SpriteColorBg",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -272,8 +272,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 0,
-      "height": 0
+      "width": 82,
+      "height": 82
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -284,7 +284,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "9emXuQVRJKnJnhex7AtRXD"
+    "fileId": "f8k6jmn/1Dv6riNk1ckLyx"
   },
   {
     "__type__": "cc.Sprite",
@@ -303,13 +303,13 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 17,
-      "g": 112,
-      "b": 56,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "939761fd-7819-4e8a-afaa-182f7c31aede@6e9cc",
+      "__uuid__": "939761fd-7819-4e8a-afaa-182f7c31aede@fd990",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -332,7 +332,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "6ergGrnVFPyphai2dM8YiA"
+    "fileId": "b2SqhXQEVKZLdSin9DTp5O"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -342,7 +342,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "batg1lwHRIJ4/FpkJwUDOE",
+    "fileId": "7cIMlqZwlKm7nEiQNODIQK",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -371,7 +371,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 22,
+      "y": 0,
       "z": 0
     },
     "_lrot": {
@@ -411,8 +411,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 64,
-      "height": 64
+      "width": 78,
+      "height": 78
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -510,7 +510,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -25,
+      "y": -58,
       "z": 0
     },
     "_lrot": {
@@ -550,8 +550,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 98,
-      "height": 47.459999999999994
+      "width": 138,
+      "height": 34.980000000000004
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -562,7 +562,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "8bsXxnWPZCv4Ad7G9bZ1kS"
+    "fileId": "88/oIU7gBB3pPUYewoTAI/"
   },
   {
     "__type__": "cc.Label",
@@ -581,19 +581,19 @@
     "_dstBlendFactor": 4,
     "_color": {
       "__type__": "cc.Color",
-      "r": 255,
-      "g": 255,
-      "b": 255,
+      "r": 0,
+      "g": 0,
+      "b": 0,
       "a": 255
     },
     "_string": "家庭厨余垃圾",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 20,
-    "_fontSize": 20,
+    "_actualFontSize": 22,
+    "_fontSize": 22,
     "_fontFamily": "Arial",
-    "_lineHeight": 21,
-    "_overflow": 3,
+    "_lineHeight": 23,
+    "_overflow": 0,
     "_enableWrapText": true,
     "_font": null,
     "_isSystemFontUsed": true,
@@ -603,15 +603,15 @@
     "_isUnderline": false,
     "_underlineHeight": 2,
     "_cacheMode": 0,
-    "_enableOutline": false,
+    "_enableOutline": true,
     "_outlineColor": {
       "__type__": "cc.Color",
-      "r": 0,
-      "g": 0,
-      "b": 0,
+      "r": 255,
+      "g": 255,
+      "b": 255,
       "a": 255
     },
-    "_outlineWidth": 2,
+    "_outlineWidth": 3,
     "_enableShadow": false,
     "_shadowColor": {
       "__type__": "cc.Color",
@@ -630,7 +630,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "d8N/5lo9FLMouAvamNmNot"
+    "fileId": "27dhJplb9OT4vHUhQ9S3lm"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -640,7 +640,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "60pc/pD3NMXIPORPpL6JVM",
+    "fileId": "d42FFRWpNMPrR4YYkEH2lW",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
