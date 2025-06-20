@@ -241,6 +241,7 @@
                 <false/>
             </struct>
             <key type="filename">tex_r25_onlyTop.png</key>
+            <key type="filename">tex_r25_outline.png</key>
             <struct type="IndividualSpriteSettings">
                 <key>pivotPoint</key>
                 <point_f>0.5,0.5</point_f>
@@ -267,6 +268,21 @@
                 <rect>9,9,17,17</rect>
                 <key>scale9Paddings</key>
                 <rect>9,9,17,17</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">tex_rubbish_outline.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>spriteScale</key>
+                <double>1</double>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>20,20,40,40</rect>
+                <key>scale9Paddings</key>
+                <rect>20,20,40,40</rect>
                 <key>scale9FromFile</key>
                 <false/>
             </struct>
@@ -304,6 +320,8 @@
                     <filename>tex_rubbish_ResidualWaste_fgplant.png</filename>
                     <filename>tex_rubbish_ResidualWaste_green.png</filename>
                     <filename>tex_rubbish_ResidualWaste_pplantff.png</filename>
+                    <filename>tex_r25_outline.png</filename>
+                    <filename>tex_rubbish_outline.png</filename>
                 </array>
             </struct>
         </map>
