@@ -43,6 +43,9 @@ export class GameManager extends Component {
     @property({ type: Node })
     public timeOver: Node = null; // 时间结束界面节点
 
+    @property({ type: Node })
+    public help: Node = null; // 帮助说明界面节点    
+
     @property({ type: Label })
     public countDownLabel: Label = null; // 倒计时标签
 
@@ -133,10 +136,11 @@ export class GameManager extends Component {
     private _generatedRubbishCount: number = 0;
 
     start() {
-        // 初始时隐藏GamePlay、TimeOver
+        // 初始时隐藏GamePlay、TimeOver、Help
         this.mainMenu.active = true;
         this.gamePlay.active = false;
         this.timeOver.active = false;
+        this.help.active = false;
 
         // 初始化垃圾箱类型
         this.initBinTypes();
@@ -178,6 +182,22 @@ export class GameManager extends Component {
     public onStartHardModeButtonClicked() {
         this._isHardMode = true;
         this.startGame();
+    }
+
+    // 点击帮助说明按钮的处理函数
+    public onHelpButtonClicked() {
+        // 隐藏MainMenu
+        this.mainMenu.active = false;
+        // 显示Help
+        this.help.active = true;
+    }
+
+    // 点击关闭帮助说明按钮的处理函数
+    public onCloseHelpButtonClicked() {
+        // 隐藏Help
+        this.help.active = false;
+        // 显示MainMenu
+        this.mainMenu.active = true;
     }
 
     private startGame() {
