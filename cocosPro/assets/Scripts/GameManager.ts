@@ -142,7 +142,7 @@ export class GameManager extends Component {
         if (typeof wx !== 'undefined') {
             wx.showShareMenu({
                 withShareTicket: true, // 如需获取群聊标识需开启
-                menus: ['shareAppMessage'] // 启用好友分享
+                menus: ['shareAppMessage', 'shareTimeline'] // 同时启用好友和朋友圈分享
             });
         }
     }
