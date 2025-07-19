@@ -443,7 +443,7 @@
         "__id__": 156
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 287
@@ -1255,6 +1255,9 @@
     "finalGameScoreLabel": {
       "__id__": 106
     },
+    "finalGameModeLabel": {
+      "__id__": 103
+    },
     "ModeNode": [
       {
         "__id__": 169
@@ -1418,7 +1421,7 @@
         "__id__": 69
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 72
@@ -3129,7 +3132,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "BgBlur",
+    "_name": "BgBlurEasy",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -4129,7 +4132,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "Label",
+    "_name": "labelMode",
     "_objFlags": 512,
     "__editorExtras__": {},
     "_parent": {
@@ -4187,8 +4190,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 320,
-      "height": 120
+      "width": 384,
+      "height": 80.64
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -4217,14 +4220,14 @@
       "b": 228,
       "a": 255
     },
-    "_string": "本次得分",
+    "_string": "本次简单模式得分",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 48,
     "_fontSize": 48,
     "_fontFamily": "Arial",
     "_lineHeight": 64,
-    "_overflow": 1,
+    "_overflow": 0,
     "_enableWrapText": false,
     "_font": null,
     "_isSystemFontUsed": true,
@@ -10516,7 +10519,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 139,
-      "height": 57
+      "height": 86
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -10866,7 +10869,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 139,
-      "height": 57
+      "height": 86
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -11216,7 +11219,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 139,
-      "height": 57
+      "height": 86
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",

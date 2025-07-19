@@ -54,7 +54,10 @@ export class GameManager extends Component {
 
     @property({ type: Label })
     public finalGameScoreLabel: Label = null; // 最终游戏分数标签
-
+    
+    @property({ type: Label })
+    public finalGameModeLabel: Label = null; // 最终游戏模式标签
+    
     @property({ type: [Node] })
     public ModeNode: Node[] = []; // 存储2个模式节点
 
@@ -344,6 +347,14 @@ export class GameManager extends Component {
 
         // 显示TimeOver、最终分数
         this.timeOver.active = true;
+        
+        if (this._isHardMode) {
+            this.finalGameModeLabel.string = "本次困难模式得分";
+            this.finalGameModeLabel.color = new Color(240, 86, 86, 255); // 困难模式字体颜色
+        }else{
+            this.finalGameModeLabel.string = "本次简单模式得分";
+            this.finalGameModeLabel.color = new Color(61, 62, 228, 255); // 简单模式字体颜色
+        }
         this.finalGameScoreLabel.string = this._gameScore.toString();
 
         // 停止生成垃圾
@@ -367,7 +378,7 @@ export class GameManager extends Component {
     }
     // 更新分数Label显示
     private updateScoreLabel() {
-        if (this.finalGameScoreLabel) {
+        if (this.gameScoreLabel) {
             this.gameScoreLabel.string = this._gameScore.toString();
         }
     }
