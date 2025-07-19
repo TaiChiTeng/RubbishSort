@@ -138,6 +138,15 @@ export class GameManager extends Component {
     // 新增：已生成的垃圾数量
     private _generatedRubbishCount: number = 0;
 
+    onLoad() {
+        if (typeof wx !== 'undefined') {
+            wx.showShareMenu({
+                withShareTicket: true, // 如需获取群聊标识需开启
+                menus: ['shareAppMessage'] // 启用好友分享
+            });
+        }
+    }
+
     start() {
         // 初始时隐藏GamePlay、TimeOver、Help
         this.mainMenu.active = true;
