@@ -303,7 +303,7 @@
       */
      function onShow(callback: (res: {
          /** 场景值*/
-         scene: number,
+         scene: string,
          /** 查询参数*/
          query: any,
          /** shareTicket*/
@@ -606,7 +606,7 @@
      function hideToast(object: { success?: (res?: any) => void, fail?: (res?: any) => void, complete?: (res?: any) => void }): void;
  
      /** 显示消息提示框*/
-     function showToast(object: { title: string, icon?: 'success' | 'loading' | 'none', image?: string, duration?: number, mask?: boolean, success?: (res?: any) => void, fail?: (res?: any) => void, complete?: (res?: any) => void }): void;
+     function showToast(object: { title: string, icon?: 'success' | 'loading' | 'none', image?: string, duration?: 1500, mask?: boolean, success?: (res?: any) => void, fail?: (res?: any) => void, complete?: (res?: any) => void }): void;
  
      /**
       * 显示模态对话框
@@ -1381,18 +1381,6 @@
          complete?: (res?: any) => void
      }): void;
 
-    //  function chooseMedia(object: {
-    //     count: number,
-    //     mediaType: Array<string>,
-    //     sourceType: Array.<string>,
-    //     maxDuration?: number,
-    //     sizeType?: Array.<string>,
-    //     camera?: 'back',
-    //     success?: (res?: any) => void,
-    //     fail?: (res?: any) => void,
-    //     complete?: (res?: any) => void,
-    // });
- 
      function chooseMedia(object: {
         count: number,
         mediaType: Array<string>,
@@ -1404,7 +1392,7 @@
         fail?: (res?: any) => void,
         complete?: (res?: any) => void,
     });
-
+ 
      /** 文件管理器*/
      interface FileSystemManager {
          /**

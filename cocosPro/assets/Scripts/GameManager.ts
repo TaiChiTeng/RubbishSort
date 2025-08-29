@@ -1,4 +1,5 @@
 import { _decorator, Component, Node, Label, Prefab, instantiate, Sprite, SpriteFrame, Color, Vec3, Tween, tween, easing } from 'cc';
+import { Rank } from './Rank';
 const { ccclass, property } = _decorator;
 
 const GAME_TIME = 60; // 定义全局游戏时间，单位为秒
@@ -44,7 +45,16 @@ export class GameManager extends Component {
     public timeOver: Node = null; // 时间结束界面节点
 
     @property({ type: Node })
-    public help: Node = null; // 帮助说明界面节点    
+    public help: Node = null; // 帮助说明界面节点
+
+    @property({ type: Node })
+    public rank: Node = null; // 排名界面节点
+    
+    @property(Rank)
+    rankComponent : Rank = null;
+
+    @property({ type: Prefab })
+    public rankItemPrefab: Prefab = null; // 存储排名项预制体
 
     @property({ type: Label })
     public countDownLabel: Label = null; // 倒计时标签
@@ -356,6 +366,10 @@ export class GameManager extends Component {
 
         // 显示TimeOver、最终分数
         this.timeOver.active = true;
+
+        // 检查是否新记录
+        // let isNewRecord = this._gameScore > this.rankComponent.getHistoryHighScore(this._isHardMode);
+        this.rankComponent.updateScore(this._gameScore, this._isHardMode);
         
         if (this._isHardMode) {
             this.finalGameModeLabel.string = "本次困难模式得分";
@@ -773,5 +787,22 @@ export class GameManager extends Component {
         this.scheduleOnce(() => {
             startAnimNode.destroy();
         }, START_ANIM_DESTROY_DELAY);
+    }
+
+    onClickRank() {
+        this.rank.active = true;
+        // 需要获取游戏难度模式：简单 或 困难
+        let isHard = this._isHardMode;
+        this.rankComponent.updateRank(isHard);
+    }
+
+    onClickNormalRank() {
+        this.rank.active = true;
+        this.rankComponent.updateRank(false);
+    }
+
+    onClickHardRank() {
+        this.rank.active = true;
+        this.rankComponent.updateRank(true);
     }
 }
