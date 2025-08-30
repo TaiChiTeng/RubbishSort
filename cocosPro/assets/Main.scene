@@ -1443,7 +1443,7 @@
         "__id__": 87
       }
     ],
-    "_active": false,
+    "_active": true,
     "_components": [
       {
         "__id__": 90
@@ -3770,7 +3770,7 @@
         "__id__": 135
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 138
@@ -8683,7 +8683,7 @@
     },
     "component": "",
     "_componentId": "fbc0eM76hBH7rA3l4G3/5b/",
-    "handler": "onCloseHelpButtonClicked",
+    "handler": "onCloseRankButtonClicked",
     "customEventData": ""
   },
   {

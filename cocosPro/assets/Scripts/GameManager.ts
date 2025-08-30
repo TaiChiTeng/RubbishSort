@@ -158,11 +158,12 @@ export class GameManager extends Component {
     }
 
     start() {
-        // 初始时隐藏GamePlay、TimeOver、Help
+        // 初始时隐藏GamePlay、TimeOver、Help、Rank
         this.mainMenu.active = true;
         this.gamePlay.active = false;
         this.timeOver.active = false;
         this.help.active = false;
+        this.rank.active = false;
 
         // 初始化垃圾箱类型
         this.initBinTypes();
@@ -804,5 +805,10 @@ export class GameManager extends Component {
     onClickHardRank() {
         this.rank.active = true;
         this.rankComponent.updateRank(true);
+    }
+
+    // 关闭排行榜界面
+    public onCloseRankButtonClicked() {
+        this.rank.active = false;
     }
 }

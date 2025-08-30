@@ -84,10 +84,9 @@ export class Rank extends Component {
         if (storageData.version != this.STORE_VERSION || storageData.date != currentDate){
             storageData.highestScore = 0;
         }
-        if (storageData.highestScore < newScore || storageData.highestScore < newScore) {
+        if (storageData.highestScore < newScore) {
             storageData.version = this.STORE_VERSION;
             storageData.date = currentDate;
-            storageData.highestScore = Math.max(newScore, storageData.highestScore);
             storageData.highestScore = Math.max(newScore, storageData.highestScore);
             sys.localStorage.setItem(isHard ? this.HARD_SCORE_KEY : this.EASY_SCORE_KEY, JSON.stringify(storageData));
         }
@@ -105,8 +104,8 @@ export class Rank extends Component {
                 event: "updateScore",
                 cloudStorageVersion: this.STORE_VERSION,
                 cloudStorageKey: isHard ? this.HARD_SCORE_KEY : this.EASY_SCORE_KEY,
-                scoreDate: currentDate,
                 highestScore: storageData.highestScore,
+                scoreDate: currentDate
             });
         }
     }
